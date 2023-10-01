@@ -1,15 +1,40 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Row, Col } from "react-bootstrap";
 import FormContainer from "../components/FormContainer";
+import { useDispatch, useSelector } from "react-redux";
+import { useLoginMutation } from "../feature/usersApiSlice";
+import { setCredential } from "../feature/authSlice";
+import {toast} from 'react-toastify'
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const [login,{isLoading}] = useLoginMutation()
+
+  const{userInfo} = useSelector((state) => state.user)
+  
+  useEffect(() => {
+    if (userInfo) {
+      navigate("/");
+    }
+  }, [navigate, userInfo]);
+
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log("submit");
+    try{
+        const res = await login({email,password}).unwrap();
+        console.log(res)
+        dispatch(setCredential({ ...res }))
+        setEmail('')
+        setPassword('')
+    } catch(error){
+        toast.error(error?.data?.message || error.error)
+    }
   };
 
   return (

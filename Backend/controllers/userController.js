@@ -19,8 +19,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (user) {
     generateToken(res, user._id);
-    console.log(res.cookie());
-    res.status(200).json(user);
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    });
   } else {
     throw new Error("Can't Register the user");
   }
@@ -39,7 +42,6 @@ const authUser = asyncHandler(async (req, res) => {
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user._id);
     res.status(200).json({
-      _id: user._id,
       name: user.name,
       email: user.email,
     });
@@ -50,7 +52,8 @@ const authUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-    res.cookie('jwt','',{
+  console.log('logging out')  
+  res.cookie('jwt','',{
         httpOnly: true,
         expires: new Date(0)
     })
